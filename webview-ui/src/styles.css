@@ -1,0 +1,72 @@
+.chat-input-container {
+    position: relative;
+    padding: 10px;
+    background: var(--vscode-editor-background);
+}
+
+.current-video {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    margin-bottom: 5px;
+    padding: 4px 8px;
+    background: var(--vscode-editor-lineHighlightBackground);
+    border-radius: 4px;
+}
+
+.chat-form {
+    display: flex;
+    gap: 8px;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--vscode-input-border);
+    background: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border-radius: 4px;
+}
+
+.button-group {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 16px;
+    background: transparent;
+    color: var(--vscode-button-foreground);
+    border: 1px solid var(--vscode-button-background);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.icon-button:hover {
+    background: var(--vscode-button-hoverBackground);
+}
+
+.send-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 16px;
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.send-button:hover {
+    background: var(--vscode-button-hoverBackground);
+} 

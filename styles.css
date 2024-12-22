@@ -1,0 +1,99 @@
+body {
+  width: 400px;
+  min-height: 600px;
+  margin: 0;
+  padding: 0;
+  background-color: #0f1117;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid #333;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo img {
+  height: 24px;
+}
+
+.header-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.icon-btn img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+  filter: invert(1);
+}
+
+.icon-btn:hover img {
+  opacity: 1;
+}
+
+.main-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+.gradient-text {
+  background: linear-gradient(45deg, #4a90e2, #a64be1, #e91e63);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 2em;
+  text-align: center;
+}
+
+.input-section {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 15px;
+  background-color: #1a1f2e;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  background: #1e2538;
+  border-radius: 8px;
+  padding: 8px 15px;
+  margin: 0 5px;
+}
+
+#askInput {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #8e8e8e;
+  padding: 8px;
+  font-size: 14px;
+  outline: none;
+  placeholder-color: #8e8e8e;
+}
+
+.input-icons {
+  display: flex;
+  gap: 15px;
+} 

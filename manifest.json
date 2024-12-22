@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "NeoynGPT",
+  "version": "1.0",
+  "description": "Your AI Assistant",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage",
+    "activeTab"
+  ]
+} 
