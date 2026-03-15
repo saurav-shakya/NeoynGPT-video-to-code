@@ -1,47 +1,57 @@
 import { Anthropic } from "@anthropic-ai/sdk"
-import { GoogleGenerativeAI } from "@google/generative-ai"
+import { GoogleGenAI } from "@google/genai"
 import { ApiHandler } from "../"
 import { ApiHandlerOptions, geminiDefaultModelId, GeminiModelId, geminiModels, ModelInfo } from "../../shared/api"
-import { convertAnthropicMessageToGemini } from "../transform/gemini-format"
+import { convertAnthropicMessageToGeminiContent } from "../transform/gemini-format"
 import { ApiStream } from "../transform/stream"
 
 export class GeminiHandler implements ApiHandler {
 	private options: ApiHandlerOptions
-	private client: GoogleGenerativeAI
+	private client: GoogleGenAI
 
 	constructor(options: ApiHandlerOptions) {
 		if (!options.geminiApiKey) {
 			throw new Error("API key is required for Google Gemini")
 		}
 		this.options = options
-		this.client = new GoogleGenerativeAI(options.geminiApiKey)
+		this.client = new GoogleGenAI({ apiKey: options.geminiApiKey })
 	}
 
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
-		const model = this.client.getGenerativeModel({
-			model: this.getModel().id,
-			systemInstruction: systemPrompt,
-		})
-		const result = await model.generateContentStream({
-			contents: messages.map(convertAnthropicMessageToGemini),
-			generationConfig: {
-				// maxOutputTokens: this.getModel().info.maxTokens,
+		const modelId = this.getModel().id
+
+		const contents = messages.map(convertAnthropicMessageToGeminiContent)
+
+		const response = await this.client.models.generateContentStream({
+			model: modelId,
+			contents,
+			config: {
+				systemInstruction: systemPrompt,
 				temperature: 0,
 			},
 		})
 
-		for await (const chunk of result.stream) {
-			yield {
-				type: "text",
-				text: chunk.text(),
+		let inputTokens = 0
+		let outputTokens = 0
+
+		for await (const chunk of response) {
+			const text = chunk.text
+			if (text) {
+				yield {
+					type: "text",
+					text,
+				}
+			}
+			if (chunk.usageMetadata) {
+				inputTokens = chunk.usageMetadata.promptTokenCount ?? 0
+				outputTokens = chunk.usageMetadata.candidatesTokenCount ?? 0
 			}
 		}
 
-		const response = await result.response
 		yield {
 			type: "usage",
-			inputTokens: response.usageMetadata?.promptTokenCount ?? 0,
-			outputTokens: response.usageMetadata?.candidatesTokenCount ?? 0,
+			inputTokens,
+			outputTokens,
 		}
 	}
 

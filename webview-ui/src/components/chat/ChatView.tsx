@@ -66,6 +66,13 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 	const [textAreaDisabled, setTextAreaDisabled] = useState(false)
 	const [selectedImages, setSelectedImages] = useState<string[]>([])
 
+	// Video state
+	const [uploadedVideo, setUploadedVideo] = useState<any>(null)
+	const [videoUploadStatus, setVideoUploadStatus] = useState<string | null>(null)
+	const [isVideoUploading, setIsVideoUploading] = useState(false)
+	const [detectedYouTubeUrl, setDetectedYouTubeUrl] = useState<string | null>(null)
+	const [videoError, setVideoError] = useState<string | null>(null)
+
 	// we need to hold on to the ask because useEffect > lastMessage will always let us know when an ask comes in and handle it, but by the time handleMessage is called, the last message might not be the ask anymore (it could be a say that followed)
 	const [clineAsk, setClineAsk] = useState<ClineAsk | undefined>(undefined)
 	const [enableButtons, setEnableButtons] = useState<boolean>(false)
@@ -264,6 +271,33 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 	const handleSendMessage = useCallback(
 		(text: string, images: string[]) => {
 			text = text.trim()
+			const hasVideo = !!(uploadedVideo || detectedYouTubeUrl)
+
+			// If user has a video attached, route through video analysis
+			if (hasVideo && text) {
+				if (detectedYouTubeUrl) {
+					vscode.postMessage({
+						type: "analyzeYouTubeVideo",
+						text: detectedYouTubeUrl + "\n" + text,
+					})
+				} else if (uploadedVideo) {
+					vscode.postMessage({
+						type: "analyzeVideo",
+						text,
+						hasVideo: true,
+					})
+				}
+				setInputValue("")
+				setTextAreaDisabled(true)
+				setSelectedImages([])
+				setUploadedVideo(null)
+				setDetectedYouTubeUrl(null)
+				setClineAsk(undefined)
+				setEnableButtons(false)
+				disableAutoScrollRef.current = false
+				return
+			}
+
 			if (text || images.length > 0) {
 				if (messages.length === 0) {
 					vscode.postMessage({ type: "newTask", text, images })
@@ -375,6 +409,22 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 		vscode.postMessage({ type: "selectImages" })
 	}, [])
 
+	const handleUploadVideo = useCallback(() => {
+		vscode.postMessage({ type: "uploadVideo" })
+	}, [])
+
+	const handleRemoveVideo = useCallback(() => {
+		setUploadedVideo(null)
+		setDetectedYouTubeUrl(null)
+		setVideoUploadStatus(null)
+		setIsVideoUploading(false)
+		vscode.postMessage({ type: "clearVideo" })
+	}, [])
+
+	const handleYouTubeUrlDetected = useCallback((url: string | null) => {
+		setDetectedYouTubeUrl(url)
+	}, [])
+
 	const shouldDisableImages =
 		!selectedModelInfo.supportsImages || textAreaDisabled || selectedImages.length >= MAX_IMAGES_PER_MESSAGE
 
@@ -411,6 +461,26 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 							handleSecondaryButtonClick()
 							break
 					}
+					break
+				case "videoUploadProgress":
+					setIsVideoUploading(true)
+					setVideoUploadStatus(message.text ?? "Uploading...")
+					break
+				case "videoReady":
+					setIsVideoUploading(false)
+					setVideoUploadStatus(null)
+					if (message.text) {
+						try {
+							setUploadedVideo(JSON.parse(message.text))
+						} catch {}
+					}
+					break
+				case "videoError":
+					setIsVideoUploading(false)
+					setVideoUploadStatus(null)
+					setVideoError(message.text ?? "Video error occurred")
+					setTimeout(() => setVideoError(null), 5000)
+					break
 			}
 			// textAreaRef.current is not explicitly required here since react gaurantees that ref will be stable across re-renders, and we're not using its value but its reference.
 		},
@@ -730,6 +800,19 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 			<MainContent>
 				<GradientText>What can we help you Build</GradientText>
 			</MainContent>
+			{videoError && (
+				<div style={{
+					padding: "8px 16px",
+					margin: "0 15px 8px 15px",
+					borderRadius: "6px",
+					background: "rgba(239, 83, 80, 0.1)",
+					border: "1px solid rgba(239, 83, 80, 0.3)",
+					color: "#ef5350",
+					fontSize: "12px",
+				}}>
+					{videoError}
+				</div>
+			)}
 			<ChatTextArea
 				ref={textAreaRef}
 				inputValue={inputValue}
@@ -746,6 +829,13 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 						scrollToBottomAuto()
 					}
 				}}
+				uploadedVideo={uploadedVideo}
+				videoUploadStatus={videoUploadStatus}
+				isVideoUploading={isVideoUploading}
+				youtubeUrl={detectedYouTubeUrl}
+				onUploadVideo={handleUploadVideo}
+				onRemoveVideo={handleRemoveVideo}
+				onYouTubeUrlDetected={handleYouTubeUrlDetected}
 			/>
 		</div>
 	)

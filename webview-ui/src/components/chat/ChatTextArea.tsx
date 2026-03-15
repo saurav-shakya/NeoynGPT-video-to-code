@@ -9,7 +9,17 @@ import {
 	shouldShowContextMenu,
 } from "../../utils/context-mentions"
 import { MAX_IMAGES_PER_MESSAGE } from "./ChatView"
+import { vscode } from "../../utils/vscode"
+import VideoPreview from "./VideoPreview"
 import styled from "styled-components"
+
+interface VideoInfo {
+	uri: string
+	mimeType: string
+	name: string
+	displayName: string
+	sizeBytes?: string
+}
 
 interface ChatTextAreaProps {
 	inputValue: string
@@ -22,62 +32,118 @@ interface ChatTextAreaProps {
 	onSelectImages: () => void
 	shouldDisableImages: boolean
 	onHeightChange?: (height: number) => void
+	// Video props
+	uploadedVideo?: VideoInfo | null
+	videoUploadStatus?: string | null
+	isVideoUploading: boolean
+	youtubeUrl?: string | null
+	onUploadVideo: () => void
+	onRemoveVideo: () => void
+	onYouTubeUrlDetected: (url: string | null) => void
 }
 
+const YOUTUBE_URL_REGEX = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)[a-zA-Z0-9_-]{11}/
+
 const InputSection = styled.div`
-	position: fixed;
-	bottom: 0;
-	width: 100%;
-	padding: 15px;
+	padding: 10px 15px 15px 15px;
 	background-color: #1a1f2e;
 `
 
 const InputContainer = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 0;
 `
 
-const TextInput = styled.input`
-	width: calc(100% - 30px);
-	padding: 12px 15px;
-	border: none;
-	border-radius: 8px;
+const TextAreaWrapper = styled.div`
+	position: relative;
+	display: flex;
+	align-items: flex-end;
 	background: #1e2538;
-	color: #8e8e8e;
-	font-size: 14px;
-	outline: none;
+	border-radius: 8px;
+	padding: 8px 10px;
 	margin: 0 5px;
+`
+
+const StyledTextArea = styled.textarea`
+	flex: 1;
+	background: none;
+	border: none;
+	color: #e0e0e0;
+	padding: 4px 8px;
+	font-size: 13px;
+	outline: none;
+	resize: none;
+	min-height: 20px;
+	max-height: 150px;
+	line-height: 1.4;
+	font-family: inherit;
+	overflow-y: auto;
 
 	&::placeholder {
 		color: #8e8e8e;
 	}
 `
 
-const IconsContainer = styled.div`
+const ToolbarRow = styled.div`
 	display: flex;
-	justify-content: flex-end;
-	gap: 15px;
-	padding: 0 10px;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
 `
 
-const IconButton = styled.button`
-	background: none;
-	border: none;
-	cursor: pointer;
-	padding: 5px;
-	opacity: 0.7;
-	transition: opacity 0.2s;
+const IconButton = styled.button<{ $active?: boolean; $disabled?: boolean }>`
+	background: ${(p) => (p.$active ? "rgba(74, 144, 226, 0.2)" : "none")};
+	border: ${(p) => (p.$active ? "1px solid rgba(74, 144, 226, 0.4)" : "1px solid transparent")};
+	cursor: ${(p) => (p.$disabled ? "not-allowed" : "pointer")};
+	padding: 4px 6px;
+	opacity: ${(p) => (p.$disabled ? 0.3 : 0.7)};
+	transition: all 0.15s;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
 	&:hover {
-		opacity: 1;
+		opacity: ${(p) => (p.$disabled ? 0.3 : 1)};
+		background: ${(p) => (p.$disabled ? "none" : "rgba(255,255,255,0.05)")};
 	}
 
-	img {
-		width: 18px;
-		height: 18px;
-		filter: invert(1);
+	span {
+		font-size: 16px;
 	}
+`
+
+const SendButton = styled.button<{ $hasContent?: boolean }>`
+	background: ${(p) => (p.$hasContent ? "linear-gradient(135deg, #4a90e2, #a64be1)" : "rgba(255,255,255,0.05)")};
+	border: none;
+	cursor: ${(p) => (p.$hasContent ? "pointer" : "default")};
+	padding: 4px 8px;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.15s;
+	margin-left: 4px;
+
+	&:hover {
+		opacity: ${(p) => (p.$hasContent ? 0.9 : 1)};
+	}
+
+	span {
+		font-size: 16px;
+		color: ${(p) => (p.$hasContent ? "#fff" : "#8e8e8e")};
+	}
+`
+
+const YouTubeBadge = styled.span`
+	font-size: 10px;
+	padding: 2px 6px;
+	border-radius: 3px;
+	background: rgba(255, 0, 0, 0.15);
+	color: #ff4444;
+	margin-left: 4px;
+	white-space: nowrap;
 `
 
 const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
@@ -93,6 +159,13 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			onSelectImages,
 			shouldDisableImages,
 			onHeightChange,
+			uploadedVideo,
+			videoUploadStatus,
+			isVideoUploading,
+			youtubeUrl,
+			onUploadVideo,
+			onRemoveVideo,
+			onYouTubeUrlDetected,
 		},
 		ref,
 	) => {
@@ -140,6 +213,24 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			}
 		}, [showContextMenu, setShowContextMenu])
 
+		// Auto-detect YouTube URLs in input
+		useEffect(() => {
+			const match = inputValue.match(YOUTUBE_URL_REGEX)
+			if (match) {
+				onYouTubeUrlDetected(match[0])
+			} else {
+				onYouTubeUrlDetected(null)
+			}
+		}, [inputValue, onYouTubeUrlDetected])
+
+		// Auto-resize textarea
+		useEffect(() => {
+			if (textAreaRef.current) {
+				textAreaRef.current.style.height = "auto"
+				textAreaRef.current.style.height = Math.min(textAreaRef.current.scrollHeight, 150) + "px"
+			}
+		}, [inputValue])
+
 		const handleMentionSelect = useCallback(
 			(type: ContextMenuOptionType, value?: string) => {
 				if (type === ContextMenuOptionType.NoResults) {
@@ -177,9 +268,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 					const newCursorPosition = newValue.indexOf(" ", mentionIndex + insertValue.length) + 1
 					setCursorPosition(newCursorPosition)
 					setIntendedCursorPosition(newCursorPosition)
-					// textAreaRef.current.focus()
 
-					// scroll to cursor
 					setTimeout(() => {
 						if (textAreaRef.current) {
 							textAreaRef.current.blur()
@@ -195,9 +284,8 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			(event: React.KeyboardEvent<HTMLTextAreaElement>) => {
 				if (showContextMenu) {
 					if (event.key === "Escape") {
-						// event.preventDefault()
 						setSelectedType(null)
-						setSelectedMenuIndex(3) // File by default
+						setSelectedMenuIndex(3)
 						return
 					}
 
@@ -210,16 +298,14 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 
 							if (optionsLength === 0) return prevIndex
 
-							// Find selectable options (non-URL types)
 							const selectableOptions = options.filter(
 								(option) =>
 									option.type !== ContextMenuOptionType.URL &&
 									option.type !== ContextMenuOptionType.NoResults,
 							)
 
-							if (selectableOptions.length === 0) return -1 // No selectable options
+							if (selectableOptions.length === 0) return -1
 
-							// Find the index of the next selectable option
 							const currentSelectableIndex = selectableOptions.findIndex(
 								(option) => option === options[prevIndex],
 							)
@@ -228,7 +314,6 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 								(currentSelectableIndex + direction + selectableOptions.length) %
 								selectableOptions.length
 
-							// Find the index of the selected option in the original options array
 							return options.findIndex((option) => option === selectableOptions[newSelectableIndex])
 						})
 						return
@@ -263,13 +348,11 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 						charBeforeCursor === " " || charBeforeCursor === "\n" || charBeforeCursor === "\r\n"
 					const charAfterIsWhitespace =
 						charAfterCursor === " " || charAfterCursor === "\n" || charAfterCursor === "\r\n"
-					// checks if char before cusor is whitespace after a mention
 					if (
 						charBeforeIsWhitespace &&
-						inputValue.slice(0, cursorPosition - 1).match(new RegExp(mentionRegex.source + "$")) // "$" is added to ensure the match occurs at the end of the string
+						inputValue.slice(0, cursorPosition - 1).match(new RegExp(mentionRegex.source + "$"))
 					) {
 						const newCursorPosition = cursorPosition - 1
-						// if mention is followed by another word, then instead of deleting the space separating them we just move the cursor to the end of the mention
 						if (!charAfterIsWhitespace) {
 							event.preventDefault()
 							textAreaRef.current?.setSelectionRange(newCursorPosition, newCursorPosition)
@@ -282,7 +365,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 						if (newText !== inputValue) {
 							event.preventDefault()
 							setInputValue(newText)
-							setIntendedCursorPosition(newPosition) // Store the new cursor position in state
+							setIntendedCursorPosition(newPosition)
 						}
 						setJustDeletedSpaceAfterMention(false)
 						setShowContextMenu(false)
@@ -309,7 +392,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 		useLayoutEffect(() => {
 			if (intendedCursorPosition !== null && textAreaRef.current) {
 				textAreaRef.current.setSelectionRange(intendedCursorPosition, intendedCursorPosition)
-				setIntendedCursorPosition(null) // Reset the state
+				setIntendedCursorPosition(null)
 			}
 		}, [inputValue, intendedCursorPosition])
 
@@ -329,7 +412,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 					if (query.length > 0) {
 						setSelectedMenuIndex(0)
 					} else {
-						setSelectedMenuIndex(3) // Set to "File" option by default
+						setSelectedMenuIndex(3)
 					}
 				} else {
 					setSearchQuery("")
@@ -346,7 +429,6 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 		}, [showContextMenu])
 
 		const handleBlur = useCallback(() => {
-			// Only hide the context menu if the user didn't click on it
 			if (!isMouseDownOnMenu) {
 				setShowContextMenu(false)
 			}
@@ -357,7 +439,6 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 				const items = e.clipboardData.items
 
 				const pastedText = e.clipboardData.getData("text")
-				// Check if the pasted content is a URL, add space after so user can easily delete if they don't want it
 				const urlRegex = /^\S+:\/\/\S+$/
 				if (urlRegex.test(pastedText.trim())) {
 					e.preventDefault()
@@ -370,20 +451,17 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 					setIntendedCursorPosition(newCursorPosition)
 					setShowContextMenu(false)
 
-					// Scroll to new cursor position
-					// https://stackoverflow.com/questions/29899364/how-do-you-scroll-to-the-position-of-the-cursor-in-a-textarea/40951875#40951875
 					setTimeout(() => {
 						if (textAreaRef.current) {
 							textAreaRef.current.blur()
 							textAreaRef.current.focus()
 						}
 					}, 0)
-					// NOTE: callbacks dont utilize return function to cleanup, but it's fine since this timeout immediately executes and will be cleaned up by the browser (no chance component unmounts before it executes)
 
 					return
 				}
 
-				const acceptedTypes = ["png", "jpeg", "webp"] // supported by anthropic and openrouter (jpg is just a file extension but the image will be recognized as jpeg)
+				const acceptedTypes = ["png", "jpeg", "webp"]
 				const imageItems = Array.from(items).filter((item) => {
 					const [type, subtype] = item.type.split("/")
 					return type === "image" && acceptedTypes.includes(subtype)
@@ -412,7 +490,6 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 					})
 					const imageDataArray = await Promise.all(imagePromises)
 					const dataUrls = imageDataArray.filter((dataUrl): dataUrl is string => dataUrl !== null)
-					//.map((dataUrl) => dataUrl.split(",")[1]) // strip the mime type prefix, sharp doesn't need it
 					if (dataUrls.length > 0) {
 						setSelectedImages((prevImages) => [...prevImages, ...dataUrls].slice(0, MAX_IMAGES_PER_MESSAGE))
 					} else {
@@ -422,14 +499,6 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			},
 			[shouldDisableImages, setSelectedImages, cursorPosition, setInputValue, inputValue],
 		)
-
-		const handleThumbnailsHeightChange = useCallback((height: number) => {
-		}, [])
-
-		useEffect(() => {
-			if (selectedImages.length === 0) {
-			}
-		}, [selectedImages])
 
 		const handleMenuMouseDown = useCallback(() => {
 			setIsMouseDownOnMenu(true)
@@ -468,24 +537,96 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			[updateCursorPosition],
 		)
 
+		const hasVideo = !!(uploadedVideo || youtubeUrl)
+		const hasContent = inputValue.trim().length > 0 || selectedImages.length > 0 || hasVideo
+
 		return (
 			<InputSection>
 				<InputContainer>
-					<TextInput placeholder="Ask NeoynGPT" />
-					<IconsContainer>
-						<IconButton>
-							<img src="icons/video.svg" alt="Video" />
-						</IconButton>
-						<IconButton>
-							<img src="icons/image.svg" alt="Image" />
-						</IconButton>
-						<IconButton>
-							<img src="icons/attach.svg" alt="Attach" />
-						</IconButton>
-						<IconButton>
-							<img src="icons/send.svg" alt="Send" />
-						</IconButton>
-					</IconsContainer>
+					{/* Video preview */}
+					<VideoPreview
+						video={uploadedVideo}
+						uploadStatus={videoUploadStatus}
+						isUploading={isVideoUploading}
+						youtubeUrl={youtubeUrl}
+						onRemove={onRemoveVideo}
+					/>
+
+					<TextAreaWrapper>
+						<StyledTextArea
+							ref={(el) => {
+								textAreaRef.current = el
+								if (typeof ref === "function") {
+									ref(el)
+								} else if (ref) {
+									ref.current = el
+								}
+							}}
+							value={inputValue}
+							onChange={handleInputChange}
+							onKeyDown={handleKeyDown}
+							onKeyUp={handleKeyUp}
+							onBlur={handleBlur}
+							onPaste={handlePaste}
+							placeholder={placeholderText}
+							disabled={textAreaDisabled}
+							rows={1}
+						/>
+						<ToolbarRow>
+							{/* Video upload button */}
+							<IconButton
+								onClick={onUploadVideo}
+								$active={hasVideo}
+								$disabled={textAreaDisabled || isVideoUploading}
+								title="Upload video for analysis"
+							>
+								<span className="codicon codicon-device-camera-video"></span>
+							</IconButton>
+
+							{/* Image button */}
+							<IconButton
+								onClick={onSelectImages}
+								$disabled={shouldDisableImages}
+								title="Attach images"
+							>
+								<span className="codicon codicon-file-media"></span>
+							</IconButton>
+
+							{/* @ mention button */}
+							<IconButton
+								onClick={() => {
+									if (textAreaRef.current) {
+										const pos = textAreaRef.current.selectionStart
+										const newValue = inputValue.slice(0, pos) + "@" + inputValue.slice(pos)
+										setInputValue(newValue)
+										setCursorPosition(pos + 1)
+										setIntendedCursorPosition(pos + 1)
+										setShowContextMenu(true)
+										setSearchQuery("")
+										setSelectedMenuIndex(3)
+										textAreaRef.current.focus()
+									}
+								}}
+								$disabled={textAreaDisabled}
+								title="Reference files with @"
+							>
+								<span className="codicon codicon-mention"></span>
+							</IconButton>
+
+							{/* YouTube detected badge */}
+							{youtubeUrl && <YouTubeBadge>YT</YouTubeBadge>}
+
+							{/* Send button */}
+							<SendButton
+								onClick={onSend}
+								$hasContent={hasContent && !textAreaDisabled}
+								disabled={!hasContent || textAreaDisabled}
+								title="Send message"
+							>
+								<span className="codicon codicon-send"></span>
+							</SendButton>
+						</ToolbarRow>
+					</TextAreaWrapper>
 				</InputContainer>
 			</InputSection>
 		)

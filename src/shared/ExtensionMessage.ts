@@ -18,6 +18,9 @@ export interface ExtensionMessage {
 		| "partialMessage"
 		| "openRouterModels"
 		| "mcpServers"
+		| "videoUploadProgress"
+		| "videoReady"
+		| "videoError"
 	text?: string
 	action?:
 		| "chatButtonClicked"

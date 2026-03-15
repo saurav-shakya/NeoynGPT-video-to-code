@@ -408,6 +408,92 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage }: 
 							</VSCodeLink>
 						)}
 					</p>
+
+					{/* Video Analysis Settings */}
+					<div style={{
+						marginTop: 15,
+						padding: "12px",
+						borderRadius: "6px",
+						background: "var(--vscode-textBlockQuote-background)",
+						border: "1px solid var(--vscode-textBlockQuote-border)",
+					}}>
+						<span style={{ fontWeight: 500, fontSize: "13px" }}>Video Analysis Settings</span>
+						<p style={{
+							fontSize: "11px",
+							marginTop: 4,
+							marginBottom: 8,
+							color: "var(--vscode-descriptionForeground)",
+						}}>
+							These settings control how videos are analyzed. The same Gemini API key is used.
+						</p>
+
+						<label style={{ fontSize: "12px", fontWeight: 500 }}>Video Analysis Model</label>
+						<VSCodeDropdown
+							style={{ width: "100%", marginTop: 4 }}
+							value={apiConfiguration?.apiModelId || geminiDefaultModelId}
+							onChange={(e: any) => {
+								const val = e.target?.value
+								if (val) {
+									setApiConfiguration({ ...apiConfiguration!, apiModelId: val })
+								}
+							}}>
+							{Object.entries(geminiModels).map(([id, info]) => (
+								<VSCodeOption key={id} value={id}>
+									{id} {info.supportsVideo ? "(video)" : ""} — ${info.inputPrice}/M in, ${info.outputPrice}/M out
+								</VSCodeOption>
+							))}
+						</VSCodeDropdown>
+						<p style={{
+							fontSize: "11px",
+							marginTop: 4,
+							color: "var(--vscode-descriptionForeground)",
+						}}>
+							gemini-2.5-flash recommended. Supports ~1hr video (default res) or ~3hrs (low res). 2.5+ models support up to 10 videos per request.
+						</p>
+
+						<div style={{ marginTop: 12 }}>
+							<label style={{ fontSize: "12px", fontWeight: 500 }}>Video Resolution</label>
+							<VSCodeRadioGroup
+								style={{ marginTop: 4 }}
+								value="default"
+								orientation="vertical">
+								<VSCodeRadio value="default">
+									Default — 258 tokens/frame, best quality (~1hr max)
+								</VSCodeRadio>
+								<VSCodeRadio value="low">
+									Low — 66 tokens/frame, 3x longer videos (~3hrs max)
+								</VSCodeRadio>
+							</VSCodeRadioGroup>
+							<p style={{
+								fontSize: "11px",
+								marginTop: 4,
+								color: "var(--vscode-descriptionForeground)",
+							}}>
+								Low resolution uses fewer tokens per frame, allowing analysis of longer videos at the cost of some visual detail.
+							</p>
+						</div>
+
+						<div style={{
+							marginTop: 12,
+							padding: "8px 10px",
+							borderRadius: "4px",
+							background: "rgba(74, 144, 226, 0.08)",
+							fontSize: "11px",
+							color: "var(--vscode-descriptionForeground)",
+						}}>
+							<strong style={{ color: "#ccc" }}>Token reference:</strong>
+							<br />
+							1 min video (default): ~17K tokens, ~$0.003
+							<br />
+							5 min video (default): ~87K tokens, ~$0.013
+							<br />
+							30 min video (default): ~522K tokens, ~$0.078
+							<br />
+							1 hr video (default): ~1M tokens, ~$0.156
+							<br />
+							<span style={{ fontSize: "10px" }}>Prices shown for gemini-2.5-flash. Audio adds ~32 tokens/sec.</span>
+						</div>
+					</div>
 				</div>
 			)}
 

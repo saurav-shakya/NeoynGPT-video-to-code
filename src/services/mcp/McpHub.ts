@@ -487,7 +487,7 @@ export class McpHub {
 				},
 			},
 			CallToolResultSchema,
-		)
+		) as McpToolCallResponse
 	}
 
 	async dispose(): Promise<void> {

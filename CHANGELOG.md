@@ -1,5 +1,34 @@
 # Change Log
 
+## [3.0.0] - NeoynGPT Video-to-Code
+
+### Added
+- **Video Upload** - Upload local video files (MP4, WebM, MOV, AVI, etc.) for frame-by-frame analysis
+- **YouTube Integration** - Paste YouTube URLs, auto-detected in chat input
+- **Google Gemini Video Analysis** - Frame-by-frame visual analysis using Gemini 2.5 Pro/Flash
+- **Two-Phase Pipeline** - Video analysis feeds into Cline agent for direct codebase changes
+- **Smart Analysis Modes** - Auto-detects bug analysis, tutorial, or app feedback from prompt
+- **Video Analysis Prompts** - 4 specialized prompt templates for different use cases
+- **Timestamp Segments** - Parse "from 01:30 to 03:00" for targeted analysis
+- **Resolution Control** - Default (258 tokens/frame) or Low (66 tokens/frame, 3x longer videos)
+- **Token Estimator** - Calculate token usage and cost before analysis
+- **Video Settings UI** - Model selector, resolution toggle, token reference in settings
+- **System Prompt Enhancement** - Cline agent now understands `<video_analysis>` blocks
+- **Retry Logic** - Auto-retry on rate limits and transient API failures (max 3 retries, exponential backoff)
+- **YouTubeHandler** - URL detection, validation, and normalization for all YouTube URL formats
+
+### Changed
+- **SDK Migration** - Moved from `@google/generative-ai` to `@google/genai` (new unified SDK)
+- **Gemini Models Updated** - Now supports gemini-2.5-pro, 2.5-flash, 2.5-flash-lite, 2.0-flash
+- **ModelInfo Interface** - Added `supportsVideo` and `maxVideosPerRequest` fields
+- **VideoManager Rewritten** - New SDK, progress callbacks, resolution support, retry logic
+
+### Removed
+- **Chrome Extension** - Removed popup.html, popup.js, styles.css, manifest.json
+- **Hardcoded API Key** - Removed `setDefaultGeminiApiKey` function
+- **Old Video Commands** - Replaced cline.uploadVideo/analyzeVideo with new integrated flow
+- **Outdated Gemini Models** - Removed 1.5-flash, 1.5-pro experimental models
+
 ## [2.2.0]
 
 - Add support for Model Context Protocol (MCP), enabling Cline to use custom tools like web-search tool or GitHub tool

@@ -1,8 +1,8 @@
 {
-	"name": "claude-dev",
-	"displayName": "Cline (prev. Claude Dev)",
-	"description": "Autonomous coding agent right in your IDE, capable of creating/editing files, running commands, using the browser, and more with your permission every step of the way.",
-	"version": "2.2.2",
+	"name": "neoyngpt-video-to-code",
+	"displayName": "NeoynGPT Video to Code",
+	"description": "Upload screen recordings or YouTube links, get frame-by-frame AI analysis, and let the coding agent fix bugs and implement features directly in your codebase.",
+	"version": "3.0.0",
 	"icon": "assets/icons/icon.png",
 	"galleryBanner": {
 		"color": "#617A91",
@@ -30,18 +30,18 @@
 		"Testing"
 	],
 	"keywords": [
-		"cline",
-		"claude",
-		"dev",
-		"mcp",
-		"openrouter",
+		"neoyngpt",
+		"video",
+		"video-to-code",
+		"gemini",
+		"screen-recording",
+		"youtube",
 		"coding",
 		"agent",
-		"autonomous",
-		"chatgpt",
-		"sonnet",
 		"ai",
-		"llama"
+		"cline",
+		"claude",
+		"autonomous"
 	],
 	"activationEvents": [],
 	"main": "./dist/extension.js",
@@ -96,12 +96,12 @@
 				"category": "Cline"
 			},
 			{
-				"command": "cline.uploadVideo",
-				"title": "Cline: Upload Video for Analysis"
+				"command": "neoyn.uploadVideo",
+				"title": "NeoynGPT: Upload Video for Analysis"
 			},
 			{
-				"command": "cline.analyzeVideo",
-				"title": "Cline: Analyze Uploaded Video"
+				"command": "neoyn.analyzeYouTubeVideo",
+				"title": "NeoynGPT: Analyze YouTube Video"
 			}
 		],
 		"menus": {
@@ -138,7 +138,19 @@
 				"cline.geminiApiKey": {
 					"type": "string",
 					"default": "",
-					"description": "Google Gemini API Key for video analysis"
+					"description": "Google Gemini API Key for video analysis and chat"
+				},
+				"neoyn.videoAnalysisModel": {
+					"type": "string",
+					"default": "gemini-2.5-flash",
+					"enum": ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"],
+					"description": "Gemini model to use for video analysis"
+				},
+				"neoyn.videoResolution": {
+					"type": "string",
+					"default": "default",
+					"enum": ["default", "low"],
+					"description": "Video analysis resolution. 'low' allows 3x longer videos but less detail per frame."
 				}
 			}
 		}
@@ -183,7 +195,7 @@
 		"@anthropic-ai/bedrock-sdk": "^0.10.2",
 		"@anthropic-ai/sdk": "^0.26.0",
 		"@anthropic-ai/vertex-sdk": "^0.4.1",
-		"@google/generative-ai": "^0.18.0",
+		"@google/genai": "^1.45.0",
 		"@modelcontextprotocol/sdk": "^1.0.1",
 		"@types/clone-deep": "^4.0.4",
 		"@types/pdf-parse": "^1.1.4",

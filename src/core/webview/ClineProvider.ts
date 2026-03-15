@@ -21,7 +21,10 @@ import { Cline } from "../Cline"
 import { openMention } from "../mentions"
 import { getNonce } from "./getNonce"
 import { getUri } from "./getUri"
-import { VideoManager } from '../../integrations/video/VideoManager';
+import { VideoManager, UploadedVideo } from '../../integrations/video/VideoManager';
+import { YouTubeHandler } from '../../integrations/video/YouTubeHandler';
+import { getVideoAnalysisPrompt, VideoAnalysisMode } from '../../integrations/video/prompts';
+import { estimateFullAnalysis, formatTokenEstimate } from '../../integrations/video/tokenEstimator';
 
 /*
 https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/default/weather-webview/src/providers/WeatherViewProvider.ts
@@ -87,7 +90,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	private workspaceTracker?: WorkspaceTracker
 	mcpHub?: McpHub
 	private latestAnnouncementId = "dec-10-2024" // update to some unique identifier when we add a new announcement
-	private currentVideoUri?: string;
+	private currentVideo?: UploadedVideo;
 
 	constructor(
 		readonly context: vscode.ExtensionContext,
@@ -521,12 +524,30 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 					case "uploadVideo":
 						await this.handleVideoUpload();
 						break;
+					case "analyzeVideo":
+						if (message.text) {
+							await this.handleVideoAnalysis(message.text);
+						}
+						break;
+					case "analyzeYouTubeVideo":
+						if (message.text) {
+							const lines = message.text.split('\n');
+							const url = lines[0].trim();
+							const prompt = lines.slice(1).join('\n').trim() || 'Analyze this video and describe what you see.';
+							if (YouTubeHandler.isYouTubeUrl(url)) {
+								const normalizedUrl = YouTubeHandler.normalizeUrl(url);
+								await this.handleVideoAnalysis(prompt, normalizedUrl);
+							} else {
+								this.postMessageToWebview({ type: 'videoError', text: 'Invalid YouTube URL.' });
+							}
+						}
+						break;
+					case "clearVideo":
+						this.currentVideo = undefined;
+						break;
 					case "sendMessage":
 						if (message.hasVideo && message.text) {
-							await this.handleVideoChat(message.text);
-						} else {
-							// Handle normal chat message
-							// ... existing code ...
+							await this.handleVideoAnalysis(message.text);
 						}
 						break;
 					// Add more switch case statements here as more webview message commands
@@ -1105,6 +1126,18 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		await this.postMessageToWebview({ type: "action", action: "chatButtonClicked" })
 	}
 
+	private getGeminiApiKey(): string | undefined {
+		return vscode.workspace.getConfiguration().get('cline.geminiApiKey') as string | undefined;
+	}
+
+	private getVideoAnalysisModel(): string {
+		return vscode.workspace.getConfiguration().get('neoyn.videoAnalysisModel') as string || 'gemini-2.5-flash';
+	}
+
+	private getVideoResolution(): "default" | "low" {
+		return (vscode.workspace.getConfiguration().get('neoyn.videoResolution') as string || 'default') as "default" | "low";
+	}
+
 	private async handleVideoUpload() {
 		const fileResult = await vscode.window.showOpenDialog({
 			canSelectFiles: true,
@@ -1112,76 +1145,136 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			canSelectMany: false,
 			filters: {
 				'Videos': ['mp4', 'mpeg', 'mov', 'avi', 'flv', 'mpg', 'webm', 'wmv', '3gp']
-			}
+			},
+			title: 'Select Video for Analysis'
 		});
 
 		if (fileResult && fileResult[0]) {
 			try {
-				const apiKey = await vscode.workspace.getConfiguration().get('cline.geminiApiKey');
+				const apiKey = this.getGeminiApiKey();
 				if (!apiKey) {
-					throw new Error('Please set your Gemini API key first');
+					this.postMessageToWebview({ type: 'videoError', text: 'Gemini API key not configured. Go to Settings to add your key.' });
+					return;
 				}
 
-				const videoManager = new VideoManager(apiKey as string);
-				const file = await videoManager.uploadVideo(fileResult[0].fsPath);
-				
-				this.currentVideoUri = file.uri;
-				
-				// Store video URI in webview state
-				this.view?.webview.postMessage({ 
-					type: 'setVideoUri', 
-					videoUri: file.uri,
-					fileName: fileResult[0].fsPath.split(/[\\/]/).pop()
+				const videoManager = new VideoManager(apiKey);
+				videoManager.setProgressCallback((progress) => {
+					this.postMessageToWebview({
+						type: 'videoUploadProgress',
+						text: progress.message || progress.status,
+					});
 				});
 
-				vscode.window.showInformationMessage('Video uploaded successfully! You can now ask questions about the video.');
-			} catch (error) {
-				vscode.window.showErrorMessage(`Failed to upload video: ${error.message}`);
+				const video = await videoManager.uploadLocalVideo({
+					filePath: fileResult[0].fsPath,
+				});
+
+				this.currentVideo = video;
+
+				this.postMessageToWebview({
+					type: 'videoReady',
+					text: JSON.stringify({
+						uri: video.uri,
+						mimeType: video.mimeType,
+						name: video.name,
+						displayName: video.displayName,
+						sizeBytes: video.sizeBytes,
+					}),
+				});
+			} catch (error: any) {
+				this.postMessageToWebview({ type: 'videoError', text: `Failed to upload video: ${error.message}` });
 			}
 		}
 	}
 
-	private async handleVideoChat(message: string) {
+	private detectAnalysisMode(userPrompt: string, isYouTube: boolean): VideoAnalysisMode {
+		const lower = userPrompt.toLowerCase();
+		if (lower.includes("bug") || lower.includes("fix") || lower.includes("broken") || lower.includes("error") || lower.includes("issue") || lower.includes("debug")) {
+			return "bug_analysis";
+		}
+		if (lower.includes("tutorial") || lower.includes("follow") || lower.includes("build") || lower.includes("create") || lower.includes("implement") || isYouTube) {
+			return "tutorial";
+		}
+		if (lower.includes("feedback") || lower.includes("review") || lower.includes("ux") || lower.includes("design") || lower.includes("improve")) {
+			return "app_feedback";
+		}
+		return "auto";
+	}
+
+	private async handleVideoAnalysis(userPrompt: string, youtubeUrl?: string) {
 		try {
-			if (!this.currentVideoUri) {
-				throw new Error('Please upload a video first');
-			}
-
-			const apiKey = await vscode.workspace.getConfiguration().get('cline.geminiApiKey');
+			const apiKey = this.getGeminiApiKey();
 			if (!apiKey) {
-				throw new Error('Please set your Gemini API key first');
+				this.postMessageToWebview({ type: 'videoError', text: 'Gemini API key not configured. Go to Settings to add your key.' });
+				return;
 			}
 
-			const videoManager = new VideoManager(apiKey as string);
-			const analysis = await videoManager.analyzeVideo(this.currentVideoUri, message);
+			const videoManager = new VideoManager(apiKey);
+			const modelId = this.getVideoAnalysisModel();
+			const resolution = this.getVideoResolution();
 
-			// Post analysis to chat
-			this.view?.webview.postMessage({ 
-				type: 'addMessage', 
-				message: analysis,
-				role: 'assistant'
-			});
-		} catch (error) {
-			vscode.window.showErrorMessage(`Failed to analyze video: ${error.message}`);
+			const mode = this.detectAnalysisMode(userPrompt, !!youtubeUrl);
+			const analysisPrompt = getVideoAnalysisPrompt(mode, userPrompt);
+
+			// Parse optional timestamp range from user prompt (e.g. "from 01:30 to 03:00")
+			const timestampMatch = userPrompt.match(/(?:from\s+)?(\d{1,2}:\d{2})\s*(?:to|-)\s*(\d{1,2}:\d{2})/i);
+			const startOffset = timestampMatch?.[1];
+			const endOffset = timestampMatch?.[2];
+
+			let analysis: string;
+
+			if (youtubeUrl) {
+				analysis = await videoManager.analyzeYouTubeVideo(youtubeUrl, {
+					prompt: analysisPrompt,
+					modelId,
+					startOffset,
+					endOffset,
+					resolution,
+				});
+			} else if (this.currentVideo) {
+				analysis = await videoManager.analyzeUploadedVideo(
+					this.currentVideo.uri,
+					this.currentVideo.mimeType,
+					{
+						prompt: analysisPrompt,
+						modelId,
+						startOffset,
+						endOffset,
+						resolution,
+					}
+				);
+			} else {
+				this.postMessageToWebview({ type: 'videoError', text: 'No video uploaded. Please upload a video or provide a YouTube URL.' });
+				return;
+			}
+
+			// Phase 2: Feed video analysis into Cline agent as context
+			const videoSource = youtubeUrl ? `YouTube: ${youtubeUrl}` : `Local file: ${this.currentVideo?.displayName}`;
+			const segmentInfo = startOffset || endOffset
+				? `\nAnalyzed segment: ${startOffset || "00:00"} to ${endOffset || "end"}`
+				: "";
+			const resolutionInfo = resolution === "low" ? " (low resolution — 3x longer video support)" : "";
+
+			const enrichedTaskMessage = `${userPrompt}
+
+<video_analysis>
+The following is a frame-by-frame visual analysis of a video the user provided.
+Use this analysis to understand what the user sees and make changes to their codebase accordingly.
+You have access to the user's workspace — use read_file, write_to_file, search_files, and execute_command to find and fix issues.
+
+Source: ${videoSource}
+Analysis model: ${modelId}${resolutionInfo}
+Analysis mode: ${mode}${segmentInfo}
+
+${analysis}
+</video_analysis>`;
+
+			// Send to Cline agent which has full codebase access
+			await this.initClineWithTask(enrichedTaskMessage);
+
+		} catch (error: any) {
+			this.postMessageToWebview({ type: 'videoError', text: `Video analysis failed: ${error.message}` });
 		}
 	}
 
-	private async handleMessage(message: WebviewMessage) {
-		switch (message.type) {
-			// ... existing message handlers ...
-			
-			case 'uploadVideo':
-				await this.handleVideoUpload();
-				break;
-				
-			case 'sendMessage':
-				if (message.hasVideo && message.text) {
-					await this.handleVideoChat(message.text);
-				} else {
-					// Handle normal chat message
-					// ... existing code ...
-				}
-				break;
-		}
-	}
 }

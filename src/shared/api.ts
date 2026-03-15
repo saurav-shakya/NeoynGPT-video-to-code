@@ -45,6 +45,8 @@ export interface ModelInfo {
 	maxTokens?: number
 	contextWindow?: number
 	supportsImages?: boolean
+	supportsVideo?: boolean
+	maxVideosPerRequest?: number
 	supportsComputerUse?: boolean
 	supportsPromptCache: boolean // this value is hardcoded for now
 	inputPrice?: number
@@ -235,55 +237,51 @@ export const openAiModelInfoSaneDefaults: ModelInfo = {
 // Gemini
 // https://ai.google.dev/gemini-api/docs/models/gemini
 export type GeminiModelId = keyof typeof geminiModels
-export const geminiDefaultModelId: GeminiModelId = "gemini-2.0-flash-exp"
+export const geminiDefaultModelId: GeminiModelId = "gemini-2.5-flash"
 export const geminiModels = {
-	"gemini-2.0-flash-exp": {
+	"gemini-2.5-pro": {
+		maxTokens: 65_536,
+		contextWindow: 1_048_576,
+		supportsImages: true,
+		supportsVideo: true,
+		maxVideosPerRequest: 10,
+		supportsPromptCache: true,
+		inputPrice: 1.25,
+		outputPrice: 10.0,
+		description: "Most capable Gemini model. Deep analysis, complex code generation. Best for detailed video analysis.",
+	},
+	"gemini-2.5-flash": {
+		maxTokens: 65_536,
+		contextWindow: 1_048_576,
+		supportsImages: true,
+		supportsVideo: true,
+		maxVideosPerRequest: 10,
+		supportsPromptCache: true,
+		inputPrice: 0.15,
+		outputPrice: 0.60,
+		description: "Best price-performance. Fast video analysis with great quality. Recommended default.",
+	},
+	"gemini-2.5-flash-lite": {
+		maxTokens: 65_536,
+		contextWindow: 1_048_576,
+		supportsImages: true,
+		supportsVideo: true,
+		maxVideosPerRequest: 10,
+		supportsPromptCache: false,
+		inputPrice: 0.075,
+		outputPrice: 0.30,
+		description: "Budget-friendly. Good for quick video scans and simple analysis.",
+	},
+	"gemini-2.0-flash": {
 		maxTokens: 8192,
 		contextWindow: 1_048_576,
 		supportsImages: true,
+		supportsVideo: true,
+		maxVideosPerRequest: 1,
 		supportsPromptCache: false,
-		inputPrice: 0,
-		outputPrice: 0,
-	},
-	"gemini-1.5-flash-002": {
-		maxTokens: 8192,
-		contextWindow: 1_048_576,
-		supportsImages: true,
-		supportsPromptCache: false,
-		inputPrice: 0,
-		outputPrice: 0,
-	},
-	"gemini-1.5-flash-exp-0827": {
-		maxTokens: 8192,
-		contextWindow: 1_048_576,
-		supportsImages: true,
-		supportsPromptCache: false,
-		inputPrice: 0,
-		outputPrice: 0,
-	},
-	"gemini-1.5-flash-8b-exp-0827": {
-		maxTokens: 8192,
-		contextWindow: 1_048_576,
-		supportsImages: true,
-		supportsPromptCache: false,
-		inputPrice: 0,
-		outputPrice: 0,
-	},
-	"gemini-1.5-pro-002": {
-		maxTokens: 8192,
-		contextWindow: 2_097_152,
-		supportsImages: true,
-		supportsPromptCache: false,
-		inputPrice: 0,
-		outputPrice: 0,
-	},
-	"gemini-1.5-pro-exp-0827": {
-		maxTokens: 8192,
-		contextWindow: 2_097_152,
-		supportsImages: true,
-		supportsPromptCache: false,
-		inputPrice: 0,
-		outputPrice: 0,
+		inputPrice: 0.10,
+		outputPrice: 0.40,
+		description: "Previous generation. Supports 1 video per request.",
 	},
 } as const satisfies Record<string, ModelInfo>
 
