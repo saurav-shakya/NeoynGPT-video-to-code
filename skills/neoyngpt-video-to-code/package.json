@@ -1,0 +1,13 @@
+{
+  "name": "neoyngpt-video-to-code-skill",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Skill copy installed by npx skills add. Run npm install in this folder.",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@google/genai": ">=1.0.0 <3.0.0"
+  }
+}

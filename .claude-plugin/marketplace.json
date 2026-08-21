@@ -1,0 +1,15 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "neoyngpt-video-to-code",
+  "description": "Gemini visual insight for public YouTube videos and local screen recordings.",
+  "owner": {
+    "name": "NeoynGPT:video-to-code"
+  },
+  "plugins": [
+    {
+      "name": "neoyngpt-video-to-code",
+      "source": "./",
+      "description": "Watch public YouTube videos or local screen recordings with Gemini, then map UI and motion onto the open repo."
+    }
+  ]
+}

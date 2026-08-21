@@ -1,0 +1,36 @@
+{
+  "name": "neoyngpt-video-to-code",
+  "version": "0.1.0",
+  "description": "Agent skill: Gemini watches a public YouTube URL or a local screen recording, then the agent maps UI/motion onto your codebase.",
+  "type": "module",
+  "bin": {
+    "neoyngpt-video-to-code": "./skills/neoyngpt-video-to-code/scripts/analyze.mjs"
+  },
+  "scripts": {
+    "analyze": "node skills/neoyngpt-video-to-code/scripts/analyze.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "skills/neoyngpt-video-to-code",
+    "plugin.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "agent-skills",
+    "gemini",
+    "youtube",
+    "video",
+    "ui",
+    "cursor",
+    "claude-code",
+    "codex"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": ">=1.0.0 <3.0.0"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "neoyngpt-video-to-code",
+  "description": "Gemini watches a public YouTube URL or a local screen recording so the agent can describe on-screen UI and map it onto your codebase.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "keywords": ["youtube", "gemini", "video", "ui", "motion"]
+}
