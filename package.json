@@ -1,6 +1,6 @@
 {
   "name": "neoyngpt-video-to-code",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Agent skill: Gemini watches a public YouTube URL or a local screen recording, then the agent maps UI/motion onto your codebase.",
   "type": "module",
   "bin": {

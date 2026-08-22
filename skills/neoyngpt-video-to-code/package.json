@@ -1,6 +1,6 @@
 {
   "name": "neoyngpt-video-to-code-skill",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Skill copy from https://github.com/saurav-shakya/NeoynGPT-video-to-code. Run npm install in this folder.",
