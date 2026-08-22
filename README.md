@@ -12,6 +12,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Node-18%2B-2EE6D6?style=for-the-badge&labelColor=070B16" alt="Node 18+">
   <img src="https://img.shields.io/badge/Gemini-3.6%20Flash-8B7CFF?style=for-the-badge&labelColor=070B16" alt="Gemini 3.6 Flash">
+  <a href="#harness-support"><img src="https://img.shields.io/badge/Harness-any%20Agent%20Skills%20host-2EE6D6?style=for-the-badge&labelColor=070B16" alt="Any Agent Skills harness"></a>
   <img src="https://img.shields.io/badge/License-MIT-FFB86B?style=for-the-badge&labelColor=070B16" alt="MIT License">
   <a href="https://www.npmjs.com/package/neoyngpt-video-to-code"><img src="https://img.shields.io/npm/v/neoyngpt-video-to-code?style=for-the-badge&label=npm&labelColor=070B16&color=F5F7FF" alt="npm version"></a>
 </p>
@@ -19,10 +20,11 @@
 <p align="center">
   <strong>Paste a public YouTube link or drop a screen recording.</strong><br>
   Gemini looks at <em>what is on screen</em> — layout, motion, icons, mascots, widgets, jank —<br>
-  then your coding agent maps that onto the repo you have open.
+  then your coding agent — in <em>any harness</em> — maps that onto the repo you have open.
 </p>
 
 <p align="center">
+  <a href="#harness-support">Harness</a> ·
   <a href="#download">Download</a> ·
   <a href="#use-it">Use it</a> ·
   <a href="#what-you-get-back">Output</a> ·
@@ -34,7 +36,9 @@
 
 ## What this is
 
-**NeoynGPT:video-to-code** is an [agent skill](https://github.com/saurav-shakya/NeoynGPT-video-to-code) plus a small CLI. It does **not** play YouTube inside the editor. It sends a public YouTube URL (or uploads a local `.mp4` / `.webm` / `.mov`) to **Gemini**, samples the pixels, and returns visual notes your agent can act on.
+**NeoynGPT:video-to-code** is an [agent skill](https://github.com/saurav-shakya/NeoynGPT-video-to-code) plus a small CLI. It does **not** play YouTube inside the editor. It sends a public YouTube URL (or uploads a local `.mp4` / `.webm` / `.mov`) to **Gemini**, samples the pixels, and returns visual notes **any Agent Skills harness** can act on.
+
+It is not locked to one tool. Cursor, Claude Code, Codex, [Antigravity CLI](https://antigravity.google/docs/cli/plugins/) (`agy`), and any other host that loads `SKILL.md` all work. Gemini CLI moved to Antigravity CLI — use that.
 
 | You have… | You ask… | You get… |
 | --- | --- | --- |
@@ -42,6 +46,22 @@
 | A **screen recording** of your app | “At 0:08 the sheet janks — what’s on screen and how do we fix it?” | Named bug + a fix in the open codebase |
 
 It is **not** a transcript tool. If you only care about what someone *said*, use captions instead.
+
+---
+
+## Harness support
+
+A **harness** is the agent runner (IDE chat or terminal) that loads skills and lets the model call tools. This repo ships a standard `SKILL.md`, so it supports **all** Agent Skills harnesses — not a Cursor-only or Claude-only plugin.
+
+| Harness | Where the skill lives | Invoke |
+| --- | --- | --- |
+| **Cursor** | `~/.cursor/skills/neoyngpt-video-to-code` | Agent chat → `/neoyngpt-video-to-code` |
+| **Claude Code** | `~/.claude/skills/neoyngpt-video-to-code` | `/neoyngpt-video-to-code` |
+| **Codex** | `~/.agents/skills/neoyngpt-video-to-code` | `/neoyngpt-video-to-code` |
+| **Antigravity CLI** (`agy`) | `~/.gemini/antigravity-cli/skills/` or project `.agents/skills/` | `/neoyngpt-video-to-code` |
+| **Any other Agent Skills host** | copy `skills/neoyngpt-video-to-code` into that host’s skills folder | slash command or paste a YouTube URL |
+
+The vision step always uses the **Gemini API** (`GEMINI_API_KEY`). The harness is whoever runs the skill afterward.
 
 ---
 
@@ -71,27 +91,36 @@ Need **Node 18+** and a **Gemini API key** from [Google AI Studio](https://aistu
 
 | I want… | Download this |
 | --- | --- |
-| The skill inside **Cursor / Claude / Codex** | [From GitHub](#cursor--claude--codex-skill) |
+| The skill in **any harness** (Cursor, Claude Code, Codex, Antigravity CLI, …) | [From GitHub](#install-the-skill-any-harness) |
 | The **CLI** on my machine | [From npm](#cli-from-npm) |
 | The full source to hack on | [Clone the repo](#clone-the-repo) |
 
 Latest code always lives on [`main`](https://github.com/saurav-shakya/NeoynGPT-video-to-code).
 
-### Cursor / Claude / Codex skill
+### Install the skill (any harness)
 
-Installs from **GitHub** (latest `main`):
+Installs from **GitHub** (latest `main`) into every common harness folder:
 
 ```bash
 npx skills add saurav-shakya/NeoynGPT-video-to-code -g
 ```
 
-Then once:
+Then once, in the folder your harness uses:
 
 ```bash
-cd ~/.cursor/skills/neoyngpt-video-to-code
-# Claude:  ~/.claude/skills/neoyngpt-video-to-code
-# Codex:   ~/.agents/skills/neoyngpt-video-to-code
+cd ~/.cursor/skills/neoyngpt-video-to-code          # Cursor
+# cd ~/.claude/skills/neoyngpt-video-to-code         # Claude Code
+# cd ~/.agents/skills/neoyngpt-video-to-code         # Codex / project-style hosts
+# cd ~/.gemini/antigravity-cli/skills/neoyngpt-video-to-code   # Antigravity CLI
 npm install
+```
+
+**Antigravity CLI** (replaces Gemini CLI) — after the copy, you can also drop the skill at the project root:
+
+```bash
+mkdir -p .agents/skills
+cp -R skills/neoyngpt-video-to-code .agents/skills/
+# then: agy   →  /neoyngpt-video-to-code
 ```
 
 **Claude Code plugin** (same repo):
@@ -100,9 +129,9 @@ npm install
 /plugin marketplace add saurav-shakya/NeoynGPT-video-to-code
 ```
 
-Then install **neoyngpt-video-to-code**. No plugin? Copy `skills/neoyngpt-video-to-code` into one of the folders above and run `npm install` there.
+Then install **neoyngpt-video-to-code**. No plugin? Copy `skills/neoyngpt-video-to-code` into that harness’s skills folder and run `npm install` there.
 
-In Cursor: **Agent** mode → new chat → `/neoyngpt-video-to-code` or paste a YouTube URL. Ask / Chat mode cannot run this.
+In Cursor: **Agent** mode → new chat → `/neoyngpt-video-to-code` or paste a YouTube URL. Ask / Chat mode cannot run this. Same idea in Claude Code, Codex, and Antigravity CLI (`agy`): the harness must be allowed to run shell.
 
 ### CLI from npm
 
@@ -177,11 +206,11 @@ git pull origin main && npm install
 
 ## Use it
 
-### Cursor / Claude / Codex
+### In your harness
 
-This skill **cannot** run in Ask / Chat (read-only) mode. Switch to **Agent**, start a **new** chat, then type `/neoyngpt-video-to-code` or paste a YouTube URL.
+This skill **cannot** run in Ask / Chat (read-only) mode. The harness must be able to run Node (Cursor **Agent**, Claude Code, Codex, Antigravity CLI `agy`, or any other Agent Skills host). Start a **new** session, then type `/neoyngpt-video-to-code` or paste a YouTube URL.
 
-Cursor loads skills from `.cursor/skills/` and `~/.cursor/skills/`. This repo already links the skill. Confirm under **Customize → Skills**.
+Cursor loads skills from `.cursor/skills/` and `~/.cursor/skills/`. Antigravity CLI loads `~/.gemini/antigravity-cli/skills/` and project `.agents/skills/`. This repo already links the skill under `.cursor/skills` and `.agents/skills`. Confirm in your harness’s skill list.
 
 The agent **must** run `scripts/analyze.mjs` before answering visual questions. If it did not run, it did not watch the video.
 
@@ -313,7 +342,7 @@ Layout:
 ```text
 skills/neoyngpt-video-to-code/
   SKILL.md              ← what the agent reads
-  scripts/analyze.mjs   ← Gemini CLI
+  scripts/analyze.mjs   ← Gemini API video CLI
   lib/parse.mjs         ← URL, timestamps, flags
   lib/env.mjs           ← .env loader
   references/           ← prompts + provider limits

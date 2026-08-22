@@ -9,7 +9,7 @@ compatibility: Requires Node 18+, npm, @google/genai, GEMINI_API_KEY, and networ
 
 Paste a **public** YouTube link **or** a **screen recording** (`.mp4` / `.webm` / `.mov`) and ask about **what is on screen**. Gemini samples the video. This does not play YouTube inside the editor.
 
-**Host:** this skill must run in **Agent** mode (it shells out to Node). Ask / Chat / read-only modes cannot call Gemini.
+**Host / harness:** any Agent Skills harness (Cursor, Claude Code, Codex, Antigravity CLI `agy`, or another host that loads this `SKILL.md`). It must be allowed to run Node. Ask / Chat / read-only modes cannot call Gemini.
 
 Never claim you watched the video unless `scripts/analyze.mjs` ran. Never answer visual questions from a transcript alone.
 
