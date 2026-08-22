@@ -3,7 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Skill copy installed by npx skills add. Run npm install in this folder.",
+  "description": "Skill copy from https://github.com/saurav-shakya/NeoynGPT-video-to-code. Run npm install in this folder.",
+  "homepage": "https://github.com/saurav-shakya/NeoynGPT-video-to-code#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saurav-shakya/NeoynGPT-video-to-code.git"
+  },
   "engines": {
     "node": ">=18"
   },

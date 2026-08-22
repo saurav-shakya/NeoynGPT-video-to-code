@@ -3,7 +3,8 @@
   "name": "neoyngpt-video-to-code",
   "description": "Gemini visual insight for public YouTube videos and local screen recordings.",
   "owner": {
-    "name": "NeoynGPT:video-to-code"
+    "name": "saurav-shakya",
+    "url": "https://github.com/saurav-shakya"
   },
   "plugins": [
     {

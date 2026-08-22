@@ -1,12 +1,19 @@
 <p align="center">
-  <img src="docs/banner.png" alt="NeoynGPT:video-to-code — watch the pixels, map the motion, fix the repo" width="100%">
+  <img src="https://raw.githubusercontent.com/saurav-shakya/NeoynGPT-video-to-code/main/docs/banner.png" alt="NeoynGPT:video-to-code — watch the pixels, map the motion, fix the repo" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/saurav-shakya/NeoynGPT-video-to-code/stargazers"><img src="https://img.shields.io/github/stars/saurav-shakya/NeoynGPT-video-to-code?style=for-the-badge&logo=github&label=GitHub%20stars&labelColor=070B16&color=8B7CFF" alt="GitHub stars"></a>
+  <a href="https://github.com/saurav-shakya/NeoynGPT-video-to-code/network/members"><img src="https://img.shields.io/github/forks/saurav-shakya/NeoynGPT-video-to-code?style=for-the-badge&label=GitHub%20forks&labelColor=070B16&color=2EE6D6" alt="GitHub forks"></a>
+  <a href="https://www.npmjs.com/package/neoyngpt-video-to-code"><img src="https://img.shields.io/npm/dw/neoyngpt-video-to-code?style=for-the-badge&logo=npm&label=npm%20weekly&labelColor=070B16&color=FFB86B" alt="npm weekly downloads"></a>
+  <a href="https://www.npmjs.com/package/neoyngpt-video-to-code"><img src="https://img.shields.io/npm/dt/neoyngpt-video-to-code?style=for-the-badge&label=npm%20total&labelColor=070B16&color=F5F7FF" alt="npm total downloads"></a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Node-18%2B-2EE6D6?style=for-the-badge&labelColor=070B16" alt="Node 18+">
   <img src="https://img.shields.io/badge/Gemini-3.6%20Flash-8B7CFF?style=for-the-badge&labelColor=070B16" alt="Gemini 3.6 Flash">
   <img src="https://img.shields.io/badge/License-MIT-FFB86B?style=for-the-badge&labelColor=070B16" alt="MIT License">
-  <img src="https://img.shields.io/badge/version-0.1.0-F5F7FF?style=for-the-badge&labelColor=070B16" alt="Version 0.1.0">
+  <a href="https://www.npmjs.com/package/neoyngpt-video-to-code"><img src="https://img.shields.io/npm/v/neoyngpt-video-to-code?style=for-the-badge&label=npm&labelColor=070B16&color=F5F7FF" alt="npm version"></a>
 </p>
 
 <p align="center">
@@ -17,6 +24,7 @@
 
 <p align="center">
   <a href="#install">Install</a> ·
+  <a href="#update">Update</a> ·
   <a href="#use-it">Use it</a> ·
   <a href="#what-you-get-back">Output</a> ·
   <a href="#limits">Limits</a> ·
@@ -66,23 +74,14 @@ You need:
 - A **Gemini API key** from [Google AI Studio](https://aistudio.google.com/apikey)
 - Network access to the Gemini API
 
-### 1. Add the skill (any agent host)
+Source of truth is always the latest [`main` on GitHub](https://github.com/saurav-shakya/NeoynGPT-video-to-code).
 
-Cursor, Claude Code, Codex, Gemini CLI, and other Agent Skills hosts:
+| How they install | What increments |
+| --- | --- |
+| `npx skills add saurav-shakya/NeoynGPT-video-to-code` or `git clone` | [GitHub stars / forks](https://github.com/saurav-shakya/NeoynGPT-video-to-code) on the README, plus **Insights → Traffic** (clones) for you as owner |
+| `npm i -g neoyngpt-video-to-code` or `npx neoyngpt-video-to-code` | [npm weekly + total downloads](https://www.npmjs.com/package/neoyngpt-video-to-code) |
 
-```bash
-npx skills add saurav-shakya/NeoynGPT-video-to-code -g
-```
-
-Then in the copied skill folder:
-
-```bash
-cd ~/.cursor/skills/neoyngpt-video-to-code   # or ~/.claude/skills / ~/.agents/skills
-npm install
-export GEMINI_API_KEY=your_key
-```
-
-The key can also live in a project `.env` (gitignored). Copy [`.env.example`](.env.example):
+The key can live in the environment or a project `.env` (gitignored). Copy [`.env.example`](.env.example). `GOOGLE_API_KEY` is accepted as a fallback.
 
 ```bash
 GEMINI_API_KEY=your_key
@@ -90,9 +89,47 @@ GEMINI_API_KEY=your_key
 # GEMINI_MODEL=gemini-3.6-flash
 ```
 
-`GOOGLE_API_KEY` is accepted as a fallback.
+### 1. Skill from GitHub (Cursor, Claude Code, Codex, …)
 
-### 2. Claude Code plugin
+Always pulls the **latest GitHub** `main`:
+
+```bash
+npx skills add saurav-shakya/NeoynGPT-video-to-code -g
+cd ~/.cursor/skills/neoyngpt-video-to-code   # or ~/.claude/skills / ~/.agents/skills
+npm install
+export GEMINI_API_KEY=your_key
+```
+
+### 2. CLI from npm
+
+Counts on [npmjs.com/package/neoyngpt-video-to-code](https://www.npmjs.com/package/neoyngpt-video-to-code):
+
+```bash
+npm install -g neoyngpt-video-to-code
+export GEMINI_API_KEY=your_key
+
+neoyngpt-video-to-code --url "https://www.youtube.com/watch?v=jSWuepkuFrU&t=75s" \
+  --question "How does the calorie tracker UI feel? What’s moving on the right?"
+
+neoyngpt-video-to-code --file ./recording.mp4 \
+  --question "The tab transition stutters. What is on screen?"
+```
+
+One-off (also counts as an npm download):
+
+```bash
+npx neoyngpt-video-to-code --help
+```
+
+### 3. CLI from latest GitHub (no npm publish wait)
+
+```bash
+npm install -g github:saurav-shakya/NeoynGPT-video-to-code
+# or a one-off:
+npx github:saurav-shakya/NeoynGPT-video-to-code --help
+```
+
+### 4. Claude Code plugin
 
 ```text
 /plugin marketplace add saurav-shakya/NeoynGPT-video-to-code
@@ -100,29 +137,42 @@ GEMINI_API_KEY=your_key
 
 Then install the **neoyngpt-video-to-code** plugin from that marketplace.
 
-### 3. Manual copy
-
-Copy `skills/neoyngpt-video-to-code` into:
-
-- `~/.cursor/skills/`
-- `~/.claude/skills/`
-- `~/.agents/skills/`
-
-Run `npm install` in that folder.
-
-### 4. CLI from this repo
+### 5. Clone this repo
 
 ```bash
 git clone https://github.com/saurav-shakya/NeoynGPT-video-to-code.git
 cd NeoynGPT-video-to-code
 npm install
 export GEMINI_API_KEY=your_key
+npx neoyngpt-video-to-code --help
+```
 
-npx neoyngpt-video-to-code --url "https://www.youtube.com/watch?v=jSWuepkuFrU&t=75s" \
-  --question "How does the calorie tracker UI feel? What’s moving on the right?"
+### 6. Manual skill copy
 
-npx neoyngpt-video-to-code --file ./recording.mp4 \
-  --question "The tab transition stutters. What is on screen?"
+Copy `skills/neoyngpt-video-to-code` into `~/.cursor/skills/`, `~/.claude/skills/`, or `~/.agents/skills/`, then `npm install` in that folder.
+
+---
+
+## Update
+
+Re-run these to get **latest GitHub `main`** (skill / plugin) or **latest npm** (CLI):
+
+```bash
+# Skill — latest GitHub
+npx skills add saurav-shakya/NeoynGPT-video-to-code -g
+
+# CLI — latest npm
+npm install -g neoyngpt-video-to-code@latest
+
+# CLI — latest GitHub commit (ahead of npm)
+npm install -g github:saurav-shakya/NeoynGPT-video-to-code
+```
+
+If you cloned the repo:
+
+```bash
+git pull origin main
+npm install
 ```
 
 ---
@@ -210,6 +260,8 @@ Live streams and premieres are unreliable until a public VOD exists.
 ```text
 npx neoyngpt-video-to-code --url <youtube-url> --question "<visual question>"
 npx neoyngpt-video-to-code --file <recording.mp4> --question "<visual question>"
+# after: npm install -g neoyngpt-video-to-code
+neoyngpt-video-to-code --url <youtube-url> --question "<visual question>"
 ```
 
 From a clone you can also run:

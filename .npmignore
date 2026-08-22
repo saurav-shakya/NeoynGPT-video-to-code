@@ -1,0 +1,17 @@
+**/node_modules
+.env
+.env.*
+!.env.example
+.cursor
+.agents
+.claude-plugin
+.cursor-plugin
+.git
+.github
+tests
+docs
+ytdesgin.md
+*.tgz
+*.log
+.DS_Store
+coverage
