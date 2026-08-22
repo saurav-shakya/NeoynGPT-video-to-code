@@ -23,8 +23,7 @@
 </p>
 
 <p align="center">
-  <a href="#install">Install</a> ·
-  <a href="#update">Update</a> ·
+  <a href="#download">Download</a> ·
   <a href="#use-it">Use it</a> ·
   <a href="#what-you-get-back">Output</a> ·
   <a href="#limits">Limits</a> ·
@@ -66,47 +65,57 @@ Honesty: this is **sampled** video, not a frame-perfect 60 fps watch. You can sa
 
 ---
 
-## Install
+## Download
 
-You need:
+Need **Node 18+** and a **Gemini API key** from [Google AI Studio](https://aistudio.google.com/apikey). Pick **one** path.
 
-- **Node 18+**
-- A **Gemini API key** from [Google AI Studio](https://aistudio.google.com/apikey)
-- Network access to the Gemini API
-
-Source of truth is always the latest [`main` on GitHub](https://github.com/saurav-shakya/NeoynGPT-video-to-code).
-
-| How they install | What increments |
+| I want… | Download this |
 | --- | --- |
-| `npx skills add saurav-shakya/NeoynGPT-video-to-code` or `git clone` | [GitHub stars / forks](https://github.com/saurav-shakya/NeoynGPT-video-to-code) on the README, plus **Insights → Traffic** (clones) for you as owner |
-| `npm i -g neoyngpt-video-to-code` or `npx neoyngpt-video-to-code` | [npm weekly + total downloads](https://www.npmjs.com/package/neoyngpt-video-to-code) |
+| The skill inside **Cursor / Claude / Codex** | [From GitHub](#cursor--claude--codex-skill) |
+| The **CLI** on my machine | [From npm](#cli-from-npm) |
+| The full source to hack on | [Clone the repo](#clone-the-repo) |
 
-The key can live in the environment or a project `.env` (gitignored). Copy [`.env.example`](.env.example). `GOOGLE_API_KEY` is accepted as a fallback.
+Latest code always lives on [`main`](https://github.com/saurav-shakya/NeoynGPT-video-to-code).
 
-```bash
-GEMINI_API_KEY=your_key
-# optional
-# GEMINI_MODEL=gemini-3.6-flash
-```
+### Cursor / Claude / Codex skill
 
-### 1. Skill from GitHub (Cursor, Claude Code, Codex, …)
-
-Always pulls the **latest GitHub** `main`:
+Installs from **GitHub** (latest `main`):
 
 ```bash
 npx skills add saurav-shakya/NeoynGPT-video-to-code -g
-cd ~/.cursor/skills/neoyngpt-video-to-code   # or ~/.claude/skills / ~/.agents/skills
-npm install
-export GEMINI_API_KEY=your_key
 ```
 
-### 2. CLI from npm
+Then once:
 
-Counts on [npmjs.com/package/neoyngpt-video-to-code](https://www.npmjs.com/package/neoyngpt-video-to-code):
+```bash
+cd ~/.cursor/skills/neoyngpt-video-to-code
+# Claude:  ~/.claude/skills/neoyngpt-video-to-code
+# Codex:   ~/.agents/skills/neoyngpt-video-to-code
+npm install
+```
+
+**Claude Code plugin** (same repo):
+
+```text
+/plugin marketplace add saurav-shakya/NeoynGPT-video-to-code
+```
+
+Then install **neoyngpt-video-to-code**. No plugin? Copy `skills/neoyngpt-video-to-code` into one of the folders above and run `npm install` there.
+
+In Cursor: **Agent** mode → new chat → `/neoyngpt-video-to-code` or paste a YouTube URL. Ask / Chat mode cannot run this.
+
+### CLI from npm
+
+Installs from **[npm](https://www.npmjs.com/package/neoyngpt-video-to-code)**:
 
 ```bash
 npm install -g neoyngpt-video-to-code
-export GEMINI_API_KEY=your_key
+```
+
+Try it:
+
+```bash
+neoyngpt-video-to-code --help
 
 neoyngpt-video-to-code --url "https://www.youtube.com/watch?v=jSWuepkuFrU&t=75s" \
   --question "How does the calorie tracker UI feel? What’s moving on the right?"
@@ -115,47 +124,43 @@ neoyngpt-video-to-code --file ./recording.mp4 \
   --question "The tab transition stutters. What is on screen?"
 ```
 
-One-off (also counts as an npm download):
+No global install — one-off:
 
 ```bash
 npx neoyngpt-video-to-code --help
 ```
 
-### 3. CLI from latest GitHub (no npm publish wait)
+Need the GitHub commit *before* it hits npm?
 
 ```bash
 npm install -g github:saurav-shakya/NeoynGPT-video-to-code
-# or a one-off:
-npx github:saurav-shakya/NeoynGPT-video-to-code --help
 ```
 
-### 4. Claude Code plugin
-
-```text
-/plugin marketplace add saurav-shakya/NeoynGPT-video-to-code
-```
-
-Then install the **neoyngpt-video-to-code** plugin from that marketplace.
-
-### 5. Clone this repo
+### Clone the repo
 
 ```bash
 git clone https://github.com/saurav-shakya/NeoynGPT-video-to-code.git
 cd NeoynGPT-video-to-code
 npm install
-export GEMINI_API_KEY=your_key
 npx neoyngpt-video-to-code --help
 ```
 
-### 6. Manual skill copy
+### Set your Gemini key
 
-Copy `skills/neoyngpt-video-to-code` into `~/.cursor/skills/`, `~/.claude/skills/`, or `~/.agents/skills/`, then `npm install` in that folder.
+Required for every path. Either export it, or copy [`.env.example`](.env.example) to `.env` in the project (gitignored). `GOOGLE_API_KEY` works as a fallback.
 
----
+```bash
+export GEMINI_API_KEY=your_key
+# optional
+# export GEMINI_MODEL=gemini-3.6-flash
+```
 
-## Update
+```bash
+# .env
+GEMINI_API_KEY=your_key
+```
 
-Re-run these to get **latest GitHub `main`** (skill / plugin) or **latest npm** (CLI):
+### Update later
 
 ```bash
 # Skill — latest GitHub
@@ -164,15 +169,8 @@ npx skills add saurav-shakya/NeoynGPT-video-to-code -g
 # CLI — latest npm
 npm install -g neoyngpt-video-to-code@latest
 
-# CLI — latest GitHub commit (ahead of npm)
-npm install -g github:saurav-shakya/NeoynGPT-video-to-code
-```
-
-If you cloned the repo:
-
-```bash
-git pull origin main
-npm install
+# Clone
+git pull origin main && npm install
 ```
 
 ---
