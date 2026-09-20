@@ -36,7 +36,7 @@ node scripts/analyze.mjs --url "YOUTUBE_URL" --question "USER_QUESTION"
 node scripts/analyze.mjs --file "/abs/path/recording.mp4" --question "USER_QUESTION"
 ```
 
-Optional: `--t 75 --window 180 --model gemini-3.6-flash`. `t=` on the YouTube link is picked up automatically. Prefer a timestamp on long videos.
+Optional: `--t 75 --window 180 --model gemini-3.8-flash`. `t=` on the YouTube link is picked up automatically. Prefer a timestamp on long videos.
 
 5. Treat stdout as **ground truth for pixels**, not as code. stderr is diagnostics.
 6. Answer with **timestamps + what is visible** (motion, spacing, icons, jank).

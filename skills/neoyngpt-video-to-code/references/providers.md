@@ -24,8 +24,8 @@ This skill uses **Gemini** only. No Qwen, Grok, yt-dlp, or ffmpeg.
 
 ## Models
 
-- Default: `gemini-3.6-flash` (override with `--model` or `GEMINI_MODEL`).
-- On “model not found”, the script retries `gemini-2.5-flash`.
+- Default: `gemini-3.8-flash` (override with `--model` or `GEMINI_MODEL`).
+- On “model not found”, the script retries `gemini-3.6-flash`.
 - Newer models: up to 10 videos per request. This skill sends **one**.
 
 ## Cost

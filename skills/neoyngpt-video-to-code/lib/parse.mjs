@@ -20,8 +20,8 @@ const VIDEO_MIME = {
 export const DEFAULT_WINDOW_SECONDS = 180;
 export const WARN_BYTES = 100 * 1024 * 1024;
 export const MAX_BYTES = 2 * 1024 * 1024 * 1024;
-export const DEFAULT_MODEL = "gemini-3.6-flash";
-export const FALLBACK_MODEL = "gemini-2.5-flash";
+export const DEFAULT_MODEL = "gemini-3.8-flash";
+export const FALLBACK_MODEL = "gemini-3.6-flash";
 
 export function parseTimestamp(raw) {
   if (raw == null || raw === "") return null;
@@ -235,7 +235,7 @@ Options:
   --question  What to look at on screen (required)
   --t         Start time in seconds or MM:SS (default: t= from the URL)
   --window    Seconds to analyze from start (default: 180 if a start time exists)
-  --model     Gemini model (default: GEMINI_MODEL or gemini-3.6-flash)
+  --model     Gemini model (default: GEMINI_MODEL or ${DEFAULT_MODEL})
   -h, --help  Show this help
 
 Needs GEMINI_API_KEY (or GOOGLE_API_KEY). Public YouTube only. Local files are

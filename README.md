@@ -3,15 +3,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/saurav-shakya/NeoynGPT-video-to-code/stargazers"><img src="https://img.shields.io/github/stars/saurav-shakya/NeoynGPT-video-to-code?style=for-the-badge&logo=github&label=GitHub%20stars&labelColor=070B16&color=8B7CFF" alt="GitHub stars"></a>
-  <a href="https://github.com/saurav-shakya/NeoynGPT-video-to-code/network/members"><img src="https://img.shields.io/github/forks/saurav-shakya/NeoynGPT-video-to-code?style=for-the-badge&label=GitHub%20forks&labelColor=070B16&color=2EE6D6" alt="GitHub forks"></a>
   <a href="https://www.npmjs.com/package/neoyngpt-video-to-code"><img src="https://img.shields.io/npm/dw/neoyngpt-video-to-code?style=for-the-badge&logo=npm&label=npm%20weekly&labelColor=070B16&color=FFB86B" alt="npm weekly downloads"></a>
   <a href="https://www.npmjs.com/package/neoyngpt-video-to-code"><img src="https://img.shields.io/npm/dt/neoyngpt-video-to-code?style=for-the-badge&label=npm%20total&labelColor=070B16&color=F5F7FF" alt="npm total downloads"></a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Node-18%2B-2EE6D6?style=for-the-badge&labelColor=070B16" alt="Node 18+">
-  <img src="https://img.shields.io/badge/Gemini-3.6%20Flash-8B7CFF?style=for-the-badge&labelColor=070B16" alt="Gemini 3.6 Flash">
+  <img src="https://img.shields.io/badge/Gemini-3.8%20Flash-8B7CFF?style=for-the-badge&labelColor=070B16" alt="Gemini 3.8 Flash">
   <a href="#harness-support"><img src="https://img.shields.io/badge/Harness-any%20Agent%20Skills%20host-2EE6D6?style=for-the-badge&labelColor=070B16" alt="Any Agent Skills harness"></a>
   <img src="https://img.shields.io/badge/License-MIT-FFB86B?style=for-the-badge&labelColor=070B16" alt="MIT License">
   <a href="https://www.npmjs.com/package/neoyngpt-video-to-code"><img src="https://img.shields.io/npm/v/neoyngpt-video-to-code?style=for-the-badge&label=npm&labelColor=070B16&color=F5F7FF" alt="npm version"></a>
@@ -181,7 +179,7 @@ Required for every path. Either export it, or copy [`.env.example`](.env.example
 ```bash
 export GEMINI_API_KEY=your_key
 # optional
-# export GEMINI_MODEL=gemini-3.6-flash
+# export GEMINI_MODEL=gemini-3.8-flash
 ```
 
 ```bash
@@ -275,7 +273,7 @@ If a repo is open:
 | Sampling | ~1 fps typical. A 200 ms micro-interaction can be missed. |
 | Length / cost | Prefer `--t` and `--window` (default **180s** if a start time exists). A 40-minute “analyze all UI” run is slow and expensive. |
 | No download | The YouTube URL is passed as-is. No yt-dlp, no ffmpeg. |
-| Model | Default `gemini-3.6-flash`. Override with `--model` or `GEMINI_MODEL`. If that model is missing, the script retries `gemini-2.5-flash`. |
+| Model | Default `gemini-3.8-flash`. Override with `--model` or `GEMINI_MODEL`. If that model is missing, the script retries `gemini-3.6-flash`. |
 | File size | Warns around 100 MB. Hard cap ~2 GB. Prefer a **1–3 minute** clip. |
 
 Live streams and premieres are unreliable until a public VOD exists.
@@ -305,7 +303,7 @@ node skills/neoyngpt-video-to-code/scripts/analyze.mjs --help
 | `--question` / `-q` | What to look at on screen (**required**). |
 | `--t` | Start time: seconds, `75s`, `1:15`, or `1h2m3s`. Default: timestamp from the URL. |
 | `--window` | Seconds to analyze from start. Default: **180** if a start time exists. |
-| `--model` | Gemini model. Default: `GEMINI_MODEL` or `gemini-3.6-flash`. |
+| `--model` | Gemini model. Default: `GEMINI_MODEL` or `gemini-3.8-flash`. |
 | `-h` / `--help` | Help text. |
 
 Pass **exactly one** of `--url` or `--file`.

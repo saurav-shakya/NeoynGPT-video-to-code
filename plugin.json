@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "neoyngpt-video-to-code",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Watch public YouTube videos or local screen recordings with Gemini, then map on-screen UI and motion onto the open repo.",
   "homepage": "https://github.com/saurav-shakya/NeoynGPT-video-to-code",
   "repository": "https://github.com/saurav-shakya/NeoynGPT-video-to-code",
