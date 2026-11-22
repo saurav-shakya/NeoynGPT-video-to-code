@@ -135,4 +135,19 @@ describe("resolveModel", () => {
     assert.equal(resolveModel(" carbon "), "gemini-4-carbon");
     assert.equal(resolveModel("gemini-4-carbon"), "gemini-4-carbon");
   });
+
+  it("passes other ids through and defaults when empty", () => {
+    assert.equal(resolveModel("gemini-3.6-flash"), "gemini-3.6-flash");
+    assert.equal(resolveModel(""), "gemini-3.8-flash");
+    assert.equal(resolveModel(undefined), "gemini-3.8-flash");
+  });
+
+  it("resolveRequest applies aliases from --model", () => {
+    const req = resolveRequest({
+      url: "https://youtu.be/jSWuepkuFrU",
+      question: "What is on screen?",
+      model: "argon",
+    });
+    assert.equal(req.model, "gemini-4-argon");
+  });
 });
