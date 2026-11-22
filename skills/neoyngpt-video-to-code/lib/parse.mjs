@@ -30,6 +30,13 @@ export const MODEL_ALIASES = {
   carbon: "gemini-4-carbon", // strongest — hardest motion / layout questions
 };
 
+export function resolveModel(raw) {
+  if (raw == null || String(raw).trim() === "") return DEFAULT_MODEL;
+  const name = String(raw).trim();
+  const key = name.toLowerCase().replace(/^gemini-4-/, "");
+  return MODEL_ALIASES[key] || name;
+}
+
 export function parseTimestamp(raw) {
   if (raw == null || raw === "") return null;
   const s = String(raw).trim().replace(/,$/, "");
