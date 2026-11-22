@@ -7,6 +7,7 @@ import {
   parseCli,
   parseTimestamp,
   parseYouTubeUrl,
+  resolveModel,
   resolveRequest,
 } from "../skills/neoyngpt-video-to-code/lib/parse.mjs";
 
@@ -124,5 +125,14 @@ describe("resolveRequest", () => {
     assert.equal(request.kind, "file");
     assert.equal(request.filePath, "./rec.mp4");
     assert.equal(request.mime, "video/mp4");
+  });
+});
+
+describe("resolveModel", () => {
+  it("maps Gemini 4 aliases to model ids", () => {
+    assert.equal(resolveModel("hydrogen"), "gemini-4-hydrogen");
+    assert.equal(resolveModel("Argon"), "gemini-4-argon");
+    assert.equal(resolveModel(" carbon "), "gemini-4-carbon");
+    assert.equal(resolveModel("gemini-4-carbon"), "gemini-4-carbon");
   });
 });
