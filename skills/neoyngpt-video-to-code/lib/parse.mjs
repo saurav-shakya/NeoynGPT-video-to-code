@@ -23,6 +23,13 @@ export const MAX_BYTES = 2 * 1024 * 1024 * 1024;
 export const DEFAULT_MODEL = "gemini-3.8-flash";
 export const FALLBACK_MODEL = "gemini-3.6-flash";
 
+// Gemini 4 family. Short aliases so `--model hydrogen` works.
+export const MODEL_ALIASES = {
+  hydrogen: "gemini-4-hydrogen", // fast, low cost — good for most clips
+  argon: "gemini-4-argon", // frontier default — dense or long UI walkthroughs
+  carbon: "gemini-4-carbon", // strongest — hardest motion / layout questions
+};
+
 export function parseTimestamp(raw) {
   if (raw == null || raw === "") return null;
   const s = String(raw).trim().replace(/,$/, "");
