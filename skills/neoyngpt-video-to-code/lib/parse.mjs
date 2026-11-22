@@ -249,7 +249,8 @@ Options:
   --question  What to look at on screen (required)
   --t         Start time in seconds or MM:SS (default: t= from the URL)
   --window    Seconds to analyze from start (default: 180 if a start time exists)
-  --model     Gemini model (default: GEMINI_MODEL or ${DEFAULT_MODEL})
+  --model     Gemini model id or alias: hydrogen | argon | carbon
+              (Gemini 4). Default: GEMINI_MODEL or ${DEFAULT_MODEL}
   -h, --help  Show this help
 
 Needs GEMINI_API_KEY (or GOOGLE_API_KEY). Public YouTube only. Local files are
