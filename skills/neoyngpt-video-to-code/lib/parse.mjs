@@ -218,7 +218,7 @@ export function resolveRequest(args) {
     startSeconds,
     endSeconds,
     videoMetadata,
-    model: args.model || process.env.GEMINI_MODEL || DEFAULT_MODEL,
+    model: resolveModel(args.model || process.env.GEMINI_MODEL),
     fullVideo: videoMetadata == null,
   };
 }
