@@ -310,6 +310,22 @@ Pass **exactly one** of `--url` or `--file`.
 
 Stdout = visual answer. Stderr = diagnostics (upload, model fallback, quota).
 
+### Models
+
+Gemini 4 models can be picked by short name with `--model` or `GEMINI_MODEL`:
+
+| Alias | Model id | Use it for |
+| --- | --- | --- |
+| `hydrogen` | `gemini-4-hydrogen` | Fast and cheap. Good for most short clips. |
+| `argon` | `gemini-4-argon` | Frontier default. Dense or long UI walkthroughs. |
+| `carbon` | `gemini-4-carbon` | Strongest. Hardest motion and layout questions. |
+
+```bash
+npx neoyngpt-video-to-code --url "https://youtu.be/jSWuepkuFrU?t=75" -q "How does the tab bar animate?" --model hydrogen
+```
+
+Any other Gemini model id is passed through unchanged.
+
 ---
 
 ## Troubleshooting
