@@ -273,7 +273,7 @@ If a repo is open:
 | Sampling | ~1 fps typical. A 200 ms micro-interaction can be missed. |
 | Length / cost | Prefer `--t` and `--window` (default **180s** if a start time exists). A 40-minute “analyze all UI” run is slow and expensive. |
 | No download | The YouTube URL is passed as-is. No yt-dlp, no ffmpeg. |
-| Model | Default `gemini-3.8-flash`. Override with `--model` or `GEMINI_MODEL`. If that model is missing, the script retries `gemini-3.6-flash`. |
+| Model | Default `gemini-3.8-flash`. Override with `--model` or `GEMINI_MODEL`. Gemini 4 aliases: `hydrogen`, `argon`, `carbon` (see [Models](#models)). If that model is missing, the script retries `gemini-3.6-flash`. |
 | File size | Warns around 100 MB. Hard cap ~2 GB. Prefer a **1–3 minute** clip. |
 
 Live streams and premieres are unreliable until a public VOD exists.
@@ -303,7 +303,7 @@ node skills/neoyngpt-video-to-code/scripts/analyze.mjs --help
 | `--question` / `-q` | What to look at on screen (**required**). |
 | `--t` | Start time: seconds, `75s`, `1:15`, or `1h2m3s`. Default: timestamp from the URL. |
 | `--window` | Seconds to analyze from start. Default: **180** if a start time exists. |
-| `--model` | Gemini model. Default: `GEMINI_MODEL` or `gemini-3.8-flash`. |
+| `--model` | Gemini model id, or a Gemini 4 alias: `hydrogen`, `argon`, `carbon`. Default: `GEMINI_MODEL` or `gemini-3.8-flash`. |
 | `-h` / `--help` | Help text. |
 
 Pass **exactly one** of `--url` or `--file`.
